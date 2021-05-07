@@ -4,6 +4,7 @@ import unidecode
 import urllib3
 import json
 import os
+import time
 import sys
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.client_context import ClientContext
@@ -145,6 +146,25 @@ def check_ip_exist_in_ipset(ip,name_ipset):
                 
     return ip_whitelists
 
+def notify_microsoft_team(message):
+    myTeamsMessage = pymsteams.connectorcard("https://3cxcloudonline.webhook.office.com/webhookb2/7f7e9c6b-8e0f-4e40-9b3a-140874f72aaf@2c5396f8-3de5-4223-9e8d-0d244bedbeb5/IncomingWebhook/40c5e39ae3a4467a866f299c9acb39c2/25b4588d-f2c8-472a-99c7-1881aaec4ec5")
+    Section1 = pymsteams.cardsection()
+    Section1.text("IP will be add proxmox")
+
+    myTeamsMessage.addSection(Section1)
+    # Create Section 2
+    Section2 = pymsteams.cardsection()
+    Section2.text(message)
+
+    # Add both Sections to the main card object
+
+
+    myTeamsMessage.addSection(Section2)
+    myTeamsMessage.summary("aaaaaa")
+
+    # Then send the card
+    myTeamsMessage.send()
+
 def nslookup(ip,name_ipset):
     cookie = 'PVEAuthCookie='+str(get_cookie(ip))
     CSRF = str(get_CSRF(ip))
@@ -168,11 +188,11 @@ def nslookup(ip,name_ipset):
             notify=add_ip_ipset_cluster(ip,ipset,domain['dns'],name_ipset)
             notifys.append(notify)
            
-           
+         
     pprint(notifys)
-    myTeamsMessage = pymsteams.connectorcard("https://3cxcloudonline.webhook.office.com/webhookb2/7f7e9c6b-8e0f-4e40-9b3a-140874f72aaf@2c5396f8-3de5-4223-9e8d-0d244bedbeb5/IncomingWebhook/40c5e39ae3a4467a866f299c9acb39c2/25b4588d-f2c8-472a-99c7-1881aaec4ec5")
-    myTeamsMessage.text(str(notifys))
-    myTeamsMessage.send()
+    notify_microsoft_team(str(notifys))
     
 if __name__ == '__main__':
-    nslookup(ip_proxmox,"linux-repo-crm")
+    while(True):
+        nslookup(ip_proxmox,"linux-repo-crm")
+        time.sleep(5)
