@@ -1,3 +1,4 @@
+from typing import no_type_check
 import requests
 import re
 import unidecode
@@ -190,7 +191,8 @@ def nslookup(ip,name_ipset):
            
          
     pprint(notifys)
-    notify_microsoft_team(str(notifys))
+    if notifys!=[]:
+        notify_microsoft_team(str(notifys))
     
 if __name__ == '__main__':
     while(True):
