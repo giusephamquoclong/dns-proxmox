@@ -331,5 +331,5 @@ def add_firewall_vm(ip, idmaymo, idmayketnoi, portmaycanmo, protocol):
         # pprint(resp3.text)
 
 if __name__ == '__main__':
-    # pprint(find_vm(ip_proxmox,"3cx-idb"))
-    add_firewall_vm(ip_proxmox,"3cx-idb","","23456","tcp")
+    pprint(find_vm(ip_proxmox,"idb"))
+    # add_firewall_vm(ip_proxmox,"3cx-idb","","23456","tcp")
