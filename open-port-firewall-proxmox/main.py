@@ -112,7 +112,6 @@ def getipvm(ip, vm):
                'Content-Type': 'application/json',
                'Connection': 'keep-alive',
                'Cookie': cookie}
-    # parameter = {'type': 'vm'}
     resp = requests.get(url, headers=headers, verify=False)
     datas = json.loads(resp.text)
     if datas["data"] == None:
@@ -120,9 +119,7 @@ def getipvm(ip, vm):
     else:
         for data in datas["data"]["result"]:
             if data["name"] == "eth0" or data["name"] == "ens192" or data["name"] == "ens18":
-                # return data["ip-addresses"]
                 for ipadd in data["ip-addresses"]:
-                    # ipvm.append(ipadd["ip-address"])
                     if ipadd["ip-address-type"] == "ipv4":
                         return ipadd["ip-address"]
 
@@ -221,11 +218,7 @@ def add_firewall_vm(ip, idmaymo, idmayketnoi, portmaycanmo, protocol):
                                 verify=False)
             datas = json.loads(resp.text)
             for data in datas["data"]:
-                # if ("dport" and"sport") in data:
-                #     print(f'source {data["sport"]}')
-                #     print(f'dest {data["dport"]}')
                 if (("dport" and"sport") in data) and (data["sport"] == portmaycanmo and data["type"] == "out"):
-                    # pprint(data)
                     dest = data["dest"]
                     pos = data["pos"]
                     rule_out1 = {'pos': pos,
@@ -234,7 +227,6 @@ def add_firewall_vm(ip, idmaymo, idmayketnoi, portmaycanmo, protocol):
                     resp1 = requests.put(url1, headers=headers,
                               data=json.dumps(rule_out1), verify=False)
                 if (("dport" and"sport") in data) and (data["dport"] == portmaycanmo and data["type"] == "in"):
-                    # pprint(data)
                     source = data["source"]
                     pos = data["pos"]
                     rule_in1 = {'pos': pos,
@@ -249,8 +241,6 @@ def add_firewall_vm(ip, idmaymo, idmayketnoi, portmaycanmo, protocol):
                                 data=json.dumps(rule_in), verify=False)
             resp2 = requests.post(url1, headers=headers,
                                 data=json.dumps(rule_out), verify=False)
-        # pprint(resp1.text)
-        # pprint(resp2.text)
 
         url2 = f"https://{ip}:8006/api2/json/nodes/{nodename_mayhost}/qemu/{vmid_mayhost}/firewall/options"
         headers = {'Content-Type': 'application/x-www-form-urlencoded',
@@ -262,7 +252,7 @@ def add_firewall_vm(ip, idmaymo, idmayketnoi, portmaycanmo, protocol):
                      'policy_out': 'DROP',
                      'enable': 1}
         resp3 = requests.put(url2,headers=headers,data=json.dumps(parameter), verify=False)
-        # pprint(resp3.text)
+
 
         # # ------------------------------------------------------------------------------
         mayketnoi = find_vm(ip, idmayketnoi)
@@ -298,9 +288,6 @@ def add_firewall_vm(ip, idmaymo, idmayketnoi, portmaycanmo, protocol):
                                 verify=False)
             datas = json.loads(resp.text)
             for data in datas["data"]:
-                # if ("dport" and"sport") in data:
-                #     print(f'source {data["sport"]}')
-                #     print(f'dest {data["dport"]}')
                 if (("dport" and"sport") in data) and (data["sport"] == portmaycanmo and data["type"] == "in"):
                     # pprint(data)
                     source = data["source"]
@@ -340,9 +327,9 @@ def add_firewall_vm(ip, idmaymo, idmayketnoi, portmaycanmo, protocol):
         parameter = {'policy_in': 'DROP',
                      'policy_out': 'DROP',
                      'enable': 1}
-        # resp3 = requests.put(url2,headers=headers,data=json.dumps(parameter), verify=False)
-        # # pprint(resp3.text)
+        resp3 = requests.put(url2,headers=headers,data=json.dumps(parameter), verify=False)
+        # pprint(resp3.text)
 
 if __name__ == '__main__':
-    pprint(find_vm(ip_proxmox,"3cx-idb"))
-    # add_firewall_vm(ip_proxmox,"3cx-idb","","23456","tcp")
+    # pprint(find_vm(ip_proxmox,"3cx-idb"))
+    add_firewall_vm(ip_proxmox,"3cx-idb","","23456","tcp")
