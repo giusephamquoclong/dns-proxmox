@@ -1,0 +1,11 @@
+requests
+Unidecode
+urllib3
+Office365-REST-Python-Client
+pandas
+openpyxl
+colorama
+termcolor
+prettyprinter
+Pygments
+pymsteams
