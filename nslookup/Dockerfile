@@ -1,4 +1,5 @@
 FROM python:3.9
+RUN apt update && apt install vim nano dnsutils -y
 RUN mkdir /app
 COPY ../nslookup /app
 WORKDIR /app
