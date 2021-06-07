@@ -16,3 +16,34 @@ node {
            }
         }
 }
+
+node {    
+      def app
+
+      stage('Clone repository') {               
+            git branch: 'develop', url: 'http://172.16.4.59/root/test-navigos.git'
+
+      }     
+      stage('Build image') {         
+       
+            app = docker.build("release-registry.vietnamworks.com/web-test-longpham")    
+       }     
+     
+       stage('Push image') {
+           docker.withRegistry('http://release-registry.vietnamworks.com'){
+            app.push("latest")      
+           }
+        }
+        def remote = [:]
+        remote.name = 'kuber-node-master'
+        remote.host = '172.16.5.60'
+        remote.user = 'root'
+        remote.password = 'N@vi1234'
+        remote.allowAnyHosts = true
+        
+        stage('Remote SSH apply images latest') {
+          sshCommand remote: remote, command: "kubectl get deploy,svc,ep,pod"
+          sshCommand remote: remote, command: "kubectl rollout restart deployment.apps/web-long-pham"
+          sshCommand remote: remote, command: "kubectl rollout status -w deployment.apps/web-long-pham"
+        }
+}
