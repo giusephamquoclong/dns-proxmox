@@ -47,3 +47,83 @@ node {
           sshCommand remote: remote, command: "kubectl rollout status -w deployment.apps/web-long-pham"
         }
 }
+
+----------------------------------------------------------------------------------------------------------------------
+pipeline {
+    agent any
+    environment {
+      images = "release-registry.vietnamworks.com/longpham-test-images:${env.BUILD_ID}"
+      dockerImage = ''
+    }
+    stages {
+      stage('Clone repository') {
+        steps {
+          checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://dev-git.vietnamworks.com/vnw/images.git']]])
+        }
+      }
+    
+      stage('Build image and push ') {
+        steps {
+            script{
+                dockerImage = docker.build(images)
+                docker.withRegistry('http://release-registry.vietnamworks.com'){
+                    dockerImage.push()
+                }
+            }
+        }
+      }
+    
+      stage('create file yaml') {
+        steps {
+            sh '''cat <<EOF > test-images.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-images
+  labels:
+    app: test-images
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-images
+  template:
+    metadata:
+      labels:
+        app: test-images
+    spec:
+      containers: 
+      - name: job-sync-api-gateway
+        image: ${images}
+        ports:
+        - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-images-service
+  labels:
+    app: test-images
+spec:
+  selector:
+    app: test-images
+  type: NodePort
+  ports:
+  - name: http-jenkins
+    port: 3000
+    targetPort: 3000
+EOF'''
+                sh 'cat test-images.yaml '
+        }
+      }
+      
+      stage('deploy k8s by kubectl ') {
+        steps {
+            sh 'kubectl apply -f test-images.yaml'
+            sh 'kubectl rollout status deployment/test-images'
+        }
+      }
+    
+    }
+
+}
